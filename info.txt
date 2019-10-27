@@ -1,0 +1,33 @@
+MetaWeather Command Line Utility - by Bradley Maness
+
+Description:
+        This command makes use of the MetaWeather API to display a table of current weather information.
+        
+        More info about the API can be found at "https://www.metaweather.com/api/".
+
+Usage: metaweather [-options] [city name]
+
+Options:    
+        -help: Opens this document.
+
+        -q [query term]: Query cities for WOEID(Where on Earth ID) number.
+
+                A query term can be any combination of case-insensitive alphabetic characters. Any
+                input containing non-alphabetic characters will return no results.
+
+
+        -i [woeid]: Get 6-day forcast for city associated with provided WOEID.
+
+                A WOEID is an integer number that corresponds with a specific city queried using the
+                -i option. Using a valid WOEID will return a 6-day table of weather information for 
+                the associated city. Data points used for this table include the following:
+
+                Date: Day of the week(yyyy/mm/dd).
+                Weather State: Brief description of conditions.
+                Min/Max/Curr(C): Minimum/maximum/current tempurature in Centigrade.
+                WinDir: Compass direction of wind.
+                WinSpd(MPH): Wind speed in miles-per-hour.
+                AP(mbar): Atmospheric Pressure.
+                Humidity: Percentage value for humidity.
+                Vis(Miles): Visibility measured in miles.
+                Pred: Accuracy percentage of weather predictions.

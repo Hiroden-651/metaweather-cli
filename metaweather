@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# This script uses the MetaWeather API in order to get current weather data.
+# API information can be found at "https://www.metaweather.com/api".
+
+# This parameter contains the basic, common part of the URL used for the API.
+url="https://www.metaweather.com/api/location/"
+
+# Two functions are defined here that retrieve and parse data using curl, jq, and awk:
+
+# get_6_woeid: uses a WOEID number to display a 6-day forcast.
+function get_6_woeid() {
+    data=$(curl -s "$url$1/")
+    if [ "$data" == "{\"detail\":\"Not found.\"}" ]; then # This triggers if we return an "empty" JSON object from the API.
+        echo "Error! No data available for WOEID $1."
+        exit 1
+    fi
+    if [ $(echo $data | cut -b1) == "<" ]; then # This triggers if we get the html returned instead. Since we know we don't need an HTML document, we compare it to the only possible first symbol '<'.
+        echo "Error! Input $1 is not a WOEID!"
+        exit 1
+    fi
+    echo $data \
+    | jq -r '. | "\(.title):\(.parent.title)"'\
+    | awk -F ':' '{printf "6-day forcast for %s, %s:\n", $1, $2}'
+    printf "Date\t\tWeather State\tMin(C)\tMax(C)\tCurr(C)\tWinDir  WinSpd(MPH)  AP(mbar)   Humidity  Vis(miles)    Pred\n"
+    echo $data \
+    | jq -r '.consolidated_weather[] | "\(.applicable_date):\(.weather_state_name):\(.min_temp):\(.max_temp):\(.the_temp):\(.wind_direction_compass):\(.wind_speed):\(.air_pressure):\(.humidity):\(.visibility):\(.predictability)"' \
+    | awk -F ':' '{printf "%s\t%s   \t%.2f\t%.2f\t%.2f\t%s\t%.2f\t     %.2f\t%.2f\t  %.2f\t\t%.2f\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11}'
+    exit 0
+}
+
+# query: uses a provided search term and displays a list of cities with their corresponding WOEIDs.
+function query() {
+    cities=$(curl -s "$url/location/search/?query=$1")
+    if [ "$cities" == "[]" ]; then
+        echo "No matching results for query $1."
+        exit 1
+    fi
+    printf "\nQuery Results: Location Name/Location Type/WOEID\n\n"
+    echo $cities | jq -r '.[] | "\(.title):\(.location_type):\(.woeid)"' \
+    | awk -F ':' '{printf "%s/%s/%s\n", $1, $2, $3}'
+    exit 0
+}
+
+
+# Command begins here:
+
+# Check if no parameters are provided.
+if (( $# == 0 )); then
+    printf "Error! No parameters given.\n\n\tUsage: 'metaweather [-options] [query]'\n\nType 'metaweather -help' for more info.\n\n"
+    exit 1
+fi
+
+# Check if parameter 1 is '-help'
+if [[ $1 == "-help" ]]; then
+    cat info.txt
+    exit 0
+fi
+
+# Check if parameter 1 is -q, then pass parameter 2 to query function.
+if [[ $1 == "-q" ]]; then
+    if [[ $# == 1 ]]; then
+        printf "Error! Option -q requires a query term.\n\n\tUsage: 'metaweather -q [query]'\n\nType 'metaweather -help' for more info.\n\n"
+        exit 1
+    fi
+    query $2
+    exit 0
+fi
+
+# Check if parameter 1 is -i, then pass parameter 2 to get_6_woeid function.
+if [[ $1 == "-i" ]]; then
+    if [[ $# == 1 ]]; then
+        printf "Error! Option -i requires a WOEID number.\n\n\tUsage: 'metaweather -i [woeid]'\n\nType 'metaweather -help' for more info.\n\n"
+        exit 1
+    fi
+    get_6_woeid $2
+    exit 0
+fi

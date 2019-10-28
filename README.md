@@ -17,8 +17,10 @@ To date this utility has three options:
 * --help: displays a help page contain in accompanying file: *info.txt*.
 ## Future Development
 #### -i Option
-* Improve table generation
+* Improve table generation.
 * Add ability to display weather sources.
 #### -q Option
 * Add option to display weather from list of locations/WOEIDs immediately after making a query.
 * Add functionality to immediately display weather when only one location is returned from a query.
+## License
+This program uses the GNU AGPL-3.0 License.

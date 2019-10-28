@@ -9,4 +9,4 @@ This utility runs in a Linux environment and requires three primary pieces of so
 * curl
 * jq
 
-The first two are usually included in most Linux distributions, but jq will most likely needs to be installed using your respective disto's package manager(e.g. `sudo apt instal jq` for Debian/Ubuntu systems).
+The first two are usually included in most Linux distributions, but jq will most likely needs to be installed using your respective disto's package manager(e.g. `sudo apt install jq` for Debian/Ubuntu systems).

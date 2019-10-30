@@ -21,11 +21,12 @@ function get_6_woeid() {
     fi
     echo $data \
     | jq -r '. | "\(.title):\(.parent.title)"'\
-    | awk -F ':' '{printf "6-day forcast for %s, %s:\n", $1, $2}'
+    | awk -F ':' '{printf "\n6-day forcast for %s, %s:\n", $1, $2}'
     printf "Date\t\tWeather State\tMin(C)\tMax(C)\tCurr(C)\tWinDir  WinSpd(MPH)  AP(mbar)   Humidity  Vis(miles)    Pred\n"
     echo $data \
     | jq -r '.consolidated_weather[] | "\(.applicable_date):\(.weather_state_name):\(.min_temp):\(.max_temp):\(.the_temp):\(.wind_direction_compass):\(.wind_speed):\(.air_pressure):\(.humidity):\(.visibility):\(.predictability)"' \
     | awk -F ':' '{printf "%s\t%s   \t%.2f\t%.2f\t%.2f\t%s\t%.2f\t     %.2f\t%.2f\t  %.2f\t\t%.2f\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11}'
+    echo
     exit 0
 }
 
@@ -33,15 +34,27 @@ function get_6_woeid() {
 function query() {
     cities=$(curl -s "$url/location/search/?query=$1")
     if [ "$cities" == "[]" ]; then
-        echo "No matching results for query $1."
+        echo "No matching results for query \"$1\"."
         exit 1
     fi
-    printf "\nQuery Results: Location Name/Location Type/WOEID\n\n"
-    echo $cities | jq -r '.[] | "\(.title):\(.location_type):\(.woeid)"' \
-    | awk -F ':' '{printf "%s/%s/%s\n", $1, $2, $3}'
+    count=$(echo $cities | tr ',' '\n' | grep -c 'title')
+    (( $count == 1 )) && echo "$count location found." || echo "$count locations found."
+    printf "\nQuery Results: Location Name/WOEID\n\n"
+    echo $cities | jq -r '.[] | "\(.title):\(.woeid)"' \
+    | awk -F ':' '{printf "%s/%s\n", $1, $2}'
+    echo
+    if (( $count == 1 )); then
+        printf "Show weather for %s?" $(echo $cities | jq .[].title)
+        printf " y/n: "; read ans
+        [[ $ans == 'y' ]] && get_6_woeid $(echo $cities | jq -r .[].woeid)
+    else
+        printf "Enter WOEID or enter 'q' to exit: "
+        read woeid;
+        [[ $woeid == 'q' ]] && exit 0 
+        get_6_woeid $woeid
+    fi
     exit 0
 }
-
 
 # Command begins here:
 
@@ -49,30 +62,27 @@ function query() {
 if (( $# == 0 )); then
     printf "Error! No parameters given.\n\n\tUsage: 'metaweather [-options] [query]'\n\nType 'metaweather -help' for more info.\n\n"
     exit 1
-fi
-
 # Check if parameter 1 is '-help'
-if [[ $1 == "-help" ]]; then
+elif [[ $1 == "-help" ]]; then
     cat info.txt
-    exit 0
-fi
-
 # Check if parameter 1 is -q, then pass parameter 2 to query function.
-if [[ $1 == "-q" ]]; then
+elif [[ $1 == "-q" ]]; then
     if [[ $# == 1 ]]; then
         printf "Error! Option -q requires a query term.\n\n\tUsage: 'metaweather -q [query]'\n\nType 'metaweather -help' for more info.\n\n"
         exit 1
     fi
     query $2
-    exit 0
-fi
-
 # Check if parameter 1 is -i, then pass parameter 2 to get_6_woeid function.
-if [[ $1 == "-i" ]]; then
+elif [[ $1 == "-i" ]]; then
     if [[ $# == 1 ]]; then
         printf "Error! Option -i requires a WOEID number.\n\n\tUsage: 'metaweather -i [woeid]'\n\nType 'metaweather -help' for more info.\n\n"
         exit 1
     fi
     get_6_woeid $2
-    exit 0
+# If bad parameters are given
+else
+    printf "Error! Bad parameters given. Type 'metaweather -help' for more info.\n"
+    exit 1
 fi
+exit 0
+

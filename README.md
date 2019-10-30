@@ -17,10 +17,16 @@ To date this utility has three options:
 * --help: displays a help page contain in accompanying file: *info.txt*.
 ## Future Development
 #### -i Option
-* Improve table generation.
-* Add ability to display weather sources.
+* [ ] Improve table generation.
+* [ ] Add ability to display weather sources.
 #### -q Option
-* Add option to display weather from list of locations/WOEIDs immediately after making a query.
-* Add functionality to immediately display weather when only one location is returned from a query.
+* [x] Add option to display weather from list of locations/WOEIDs immediately after making a query. *Added October 30th, 2019*.
+* [x] Add functionality to immediately display weather when only one location is returned from a query. *Added October 30th*, 2019.
+## Notes
+#### Known Issues
+- Some valid WOEIDs will not return any data. This is due to the limitations of the MetaWeather API. An example of this is Reykjavík, Iceland(980389).
+- Some data fields of the JSON objects returned from valid WOEIDs are incomplete due to lack of sources. Incomplete numeric fields are filled with placeholder values of 0/0.00.
+#### Other
+- All loating point values from JSON data are rounded to the nearest hundredth(#.##) in order to fit them into the current table stucture. 
 ## License
 This program uses the GNU AGPL-3.0 License.

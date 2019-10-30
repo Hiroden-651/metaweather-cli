@@ -5,7 +5,8 @@ Description:
         
         More info about the API can be found at "https://www.metaweather.com/api/".
 
-Usage: metaweather [-options] [city name]
+Usage: 
+        metaweather [-options] [city name]
 
 Options:    
         -help: Opens this document.
@@ -15,6 +16,13 @@ Options:
                 A query term can be any combination of case-insensitive alphabetic characters. Any
                 input containing non-alphabetic characters will return no results.
 
+                If a query returns only one result, the programs asks the user if they wish to display
+                the weather for that single location or exit. Choosing to show weather will display a
+                6-day forecast for the location. 
+
+                If a query returns multiple locations, the program asks the user to input a WOEID for a
+                corresponding location or exit. If a user enters a valid WOEID, the 6-day
+                forecast for that location will be displayed.
 
         -i [woeid]: Get 6-day forcast for city associated with provided WOEID.
 
